@@ -123,6 +123,6 @@ public class PlanElement {
 	}
 
 	public String toString() {
-		return String.format("Index: %d, Prob: %a, Status: %b ", this.index, this.p, this.b);
+		return String.format("Index: %d, Prob: %f, Status: %b ", this.index, this.p, this.b);
 	}
 }
