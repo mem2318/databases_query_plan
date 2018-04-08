@@ -207,10 +207,11 @@ public class DatabaseQueryPlanGenerator {
                 // System.out.println();
             }
             for(int i = 0; i < A.length; i++){
-                System.out.println(A[i].toString());
+                // System.out.println(A[i].toString());
+                System.out.println(A[i].printTree());
             }
 
-            System.out.println(A[A.length-1].printTree());
+            // System.out.println(A[A.length-1].printTree());
         }
     }
 }

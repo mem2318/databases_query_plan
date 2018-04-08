@@ -114,15 +114,15 @@ public class PlanElement {
 	public String printTree() {
 		String output = this.toString()+"\n";
 		if(this.L != null){
-			output += this.L.printTree().replaceAll("\n", "\n\t");
+			output += "\t"+this.index+" Left: "+this.L.printTree().replaceAll("\n", "\n\t");
 		}
 		if(this.R != null){
-			output += this.R.printTree().replaceAll("\n", "\n\t");
+			output += this.index+" Right: "+this.R.printTree().replaceAll("\n", "\n\t");
 		}
 		return output;
 	}
 
 	public String toString() {
-		return String.format("Index: %d, Prob: %f, Status: %b ", this.index, this.p, this.b);
+		return String.format("Index: %d, Cost: %f,  Prob: %f, Status: %b ", this.index, this.c, this.p, this.b);
 	}
 }
