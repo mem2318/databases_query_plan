@@ -122,6 +122,7 @@ public class DatabaseQueryPlanGenerator {
                 }
 
                 A[i-1].c = logicalCost > noBranchCost ? noBranchCost : logicalCost;
+                A[i-1].b = logicalCost > noBranchCost ? true : false;
                 System.out.println("Cost "+i+": "+logicalCost + " " + noBranchCost);
             }
             
