@@ -21,4 +21,9 @@ public class PlanElement {
 		this.b = b;
 		this.c = c;
 	}
+	public PlanElement(int n, double p, boolean b) {
+		this.n = n;
+		this.p = p;
+		this.b = b;
+	}
 }
