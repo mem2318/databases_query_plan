@@ -24,6 +24,16 @@ public class DatabaseQueryPlanGenerator {
        return (val >> position) & 1;
     }
 
+    static double computeProb(ArrayList<Double> probs, int mask){
+        double prob = 1.0;
+        for(int j = 0; j < probs.size(); j++) {
+            if(getBit(mask, j) == 1){
+                prob *= probs.get(j);
+            }
+        }
+        return prob;
+    }
+
 	public static void main(String[] args) {
         Properties prop = new Properties();
         InputStream configInput = null;
@@ -90,17 +100,19 @@ public class DatabaseQueryPlanGenerator {
             PlanElement[] A = new PlanElement[numOfPlans];
             for(int i = 1; i <= A.length; i++){
                 int bits = countSetBits(i);
-                double prob = 1.0;
+                double prob = computeProb(queryProbs, i);
                 int k = bits;
-                double sumProb = 0.0;
-                for(int j = 0; j < queryProbs.size(); j++) {
-                    if(getBit(i, j) == 1){
-                        prob *= queryProbs.get(j);
-                        sumProb += queryProbs.get(j);
-                    }
-                }
+                // double sumProb = 0.0;
+                // for(int j = 0; j < queryProbs.size(); j++) {
+                //     if(getBit(i, j) == 1){
+                //         prob *= queryProbs.get(j);
+                //         sumProb += queryProbs.get(j);
+                //     }
+                // }
 
-                A[i-1] = new PlanElement(bits, prob, false);
+
+
+                A[i-1] = new PlanElement(bits, prob, false, i);
                 System.out.println("Params "+i+": "+ bits+" "+prob);
 
                 double q;
@@ -115,32 +127,55 @@ public class DatabaseQueryPlanGenerator {
 
                 A[i-1].c = logicalCost > noBranchCost ? noBranchCost : logicalCost;
                 A[i-1].b = logicalCost > noBranchCost ? true : false;
-                System.out.println("Cost "+i+": "+logicalCost + " " + noBranchCost);
+                // System.out.println("Cost "+i+": "+logicalCost + " " + noBranchCost);
             }
 
-            for(int i = 0; i < A.length; i++){
-                System.out.print(A[i].c+" ");
-            }
+            // for(int i = 0; i < A.length; i++){
+            //     System.out.print(A[i].c+" ");
+            // }
             
-            System.out.println();
+            System.out.println("\n\nPart 2:\n");
 
             for(int s = 1; s <= A.length; s++){
-                int sp = (~s) & (A.length);
-                System.out.println(sp);
-                if(sp != 0){
+                int s_all = (~s) & (A.length);
+                System.out.println(s+" "+s_all);
+                for(int sp = 0; sp <= A.length; sp++){
+                    if((~s_all & sp) == 0 && sp != 0){
+                        System.out.println(sp);
+                        int sp_k = countSetBits(sp);
+                        double sp_fcost = sp_k*r + (sp_k-1)*l + f*sp_k + t;
+                        double sp_p = computeProb(queryProbs, sp);
+                        double sp_cmetric = (sp_p-1)/sp_fcost;
+                        System.out.println(A[s-1].printTree());
+                        PlanElement s_leftmost = A[s-1].getLeftmostLogical();
+                        double s_leftmost_fcost = s_leftmost.n*r + (s_leftmost.n-1)*l + f*s_leftmost.n + t;
+                        double s_leftmost_p = computeProb(queryProbs, s_leftmost.getIndex());
+                        if(s_leftmost_p != s_leftmost.p){
+                            System.out.println("non-matching s leftmost prob");
+                        }
+                        double s_leftmost_cmetric = (s_leftmost_p-1)/s_leftmost_fcost;
 
+                        if(s_leftmost_cmetric > sp_cmetric){
 
-                    double branchingAnd = 0.0;
-
-                    for(int j = queryProbs.size()-1; j >= 0; j--){
-                        if(getBit(s, j) == 1){
-                            double p_n = queryProbs.get(j);
-                            double q_n = p_n <= 0.5 ? p_n : 1.0-p_n; 
-                            branchingAnd = r + t + f + m*q_n + p_n*branchingAnd;
                         }
                     }
-
                 }
+
+
+                // System.out.println(sp);
+                // if(sp != 0){
+                //     double branchingAnd = 0.0;
+
+                //     for(int j = queryProbs.size()-1; j >= 0; j--){
+                //         if(getBit(s, j) == 1){
+                //             double p_n = queryProbs.get(j);
+                //             double q_n = p_n <= 0.5 ? p_n : 1.0-p_n; 
+                //             branchingAnd = r + t + f + m*q_n + p_n*branchingAnd;
+                //         }
+                //     }
+
+                // }
+                System.out.println();
             }
         }
     }
