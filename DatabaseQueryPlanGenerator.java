@@ -85,10 +85,10 @@ public class DatabaseQueryPlanGenerator {
 
         for(ArrayList<Double> queryProbs : queryList){
 
-            int numOfPlans = (int) Math.pow(2, queryProbs.size());
+            int numOfPlans = ((int) Math.pow(2, queryProbs.size()))-1;
             System.out.println("NumPlans: "+numOfPlans);
             PlanElement[] A = new PlanElement[numOfPlans];
-            for(int i = 1; i < A.length; i++){
+            for(int i = 1; i <= A.length; i++){
                 int bits = countSetBits(i);
                 double prob = 1.0;
                 int k = bits;
@@ -111,22 +111,50 @@ public class DatabaseQueryPlanGenerator {
                 }
                 double logicalCost = k*r + (k-1)*l + f*k + t + m*q + prob*a;
 
-                double noBranchCost = 0.0;
-
-                for(int j = queryProbs.size()-1; j >= 0; j--){
-                    if(getBit(i, j) == 1){
-                        double p_n = queryProbs.get(j);
-                        double q_n = p_n <= 0.5 ? p_n : 1.0-p_n; 
-                        noBranchCost = r + t + f + m*q_n + p_n*noBranchCost;
-                    }
-                }
+                double noBranchCost = k*r + (k-1)*l + f*k + a;
 
                 A[i-1].c = logicalCost > noBranchCost ? noBranchCost : logicalCost;
                 A[i-1].b = logicalCost > noBranchCost ? true : false;
                 System.out.println("Cost "+i+": "+logicalCost + " " + noBranchCost);
             }
+
+            for(int i = 0; i < A.length; i++){
+                System.out.print(A[i].c+" ");
+            }
             
             System.out.println();
+
+            for(int s = 1; s <= A.length; s++){
+                int sp = (~s) & (A.length);
+                System.out.println(sp);
+                if(sp != 0){
+
+
+                    double branchingAnd = 0.0;
+
+                    for(int j = queryProbs.size()-1; j >= 0; j--){
+                        if(getBit(s, j) == 1){
+                            double p_n = queryProbs.get(j);
+                            double q_n = p_n <= 0.5 ? p_n : 1.0-p_n; 
+                            branchingAnd = r + t + f + m*q_n + p_n*branchingAnd;
+                        }
+                    }
+
+                }
+            }
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
