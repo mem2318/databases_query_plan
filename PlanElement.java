@@ -81,11 +81,11 @@ public class PlanElement {
 		ArrayList<PlanElement> leftSide = null;
 		ArrayList<PlanElement> rightSide = null;
 		if(this.L == null && this.R == null){
-			if(this.b == false){
-				ArrayList<PlanElement> tempList = new ArrayList<PlanElement>();
-				tempList.add(this);
-				return tempList;
-			}
+			// if(this.b == false){
+			ArrayList<PlanElement> tempList = new ArrayList<PlanElement>();
+			tempList.add(this);
+			return tempList;
+			// }
 		}
 		if(this.L != null){
 			leftSide = this.L.getLogicalTerms();
