@@ -71,6 +71,26 @@ public class PlanElement {
 		return null;
 	}
 
+	public ArrayList<PlanElement> inOrderTraversal(){
+		ArrayList<PlanElement> temp = new ArrayList<PlanElement>();
+		if(this.L == null && this.R == null){
+			temp.add(this);
+		} else if(this.L == null){
+			System.out.println("ERROR NULL LEFT VALID RIGHT");
+			temp.add(this);
+			temp.addAll(this.R.inOrderTraversal());
+		} else if(this.R == null){
+			System.out.println("ERROR NULL RIGHT VALID LEFT");
+			temp.addAll(this.L.inOrderTraversal());
+			temp.add(this);
+		} else {
+			temp.addAll(this.L.inOrderTraversal());
+			temp.add(this);
+			temp.addAll(this.R.inOrderTraversal());
+		}
+		return temp;
+	}
+
 	public ArrayList<PlanElement> getLogicalTerms(){
 		if(this.L == null && this.R != null){
 			System.out.println("right without left");

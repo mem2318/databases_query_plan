@@ -33,6 +33,24 @@ public class DatabaseQueryPlanGenerator {
         }
         return prob;
     }
+    static String logicalAndString(PlanElement elem, ArrayList<Double> queryProbs){
+        String output = "(";
+        int bitmap = elem.getIndex();
+        int counter = 0;
+        int numbits = countSetBits(bitmap);
+        for(int j = 0; j < queryProbs.size(); j++){
+            int bit = getBit(bitmap, j);
+            if(bit == 1){
+                counter++;
+                output += String.format("t%d[o%d[i]]", j+1, j+1);
+                if(counter < numbits){
+                    output += " & ";
+                }
+            }
+        }
+        output += ")";
+        return output;
+    }
 
 	public static void main(String[] args) {
         Properties prop = new Properties();
@@ -207,16 +225,56 @@ public class DatabaseQueryPlanGenerator {
                 // }
                 // System.out.println();
             }
-            for(int i = 0; i < A.length; i++){
-                // System.out.println(A[i].toString());
-                System.out.println(A[i].printTree());
-            }
+            // for(int i = 0; i < A.length; i++){
+            //     // System.out.println(A[i].toString());
+            //     System.out.println(A[i].printTree());
+            // }
+            System.out.println("Finished Algorithm 1 for: "+queryProbs.toString());
+            System.out.println(A[A.length-1].printTree());
 
-            // System.out.println(A[A.length-1].printTree());
+            ArrayList<PlanElement> inOrderTraversal = A[A.length-1].inOrderTraversal();
+            String output = "if(";
+            for(int i = 0; i < inOrderTraversal.size(); i++){
+                PlanElement elem = inOrderTraversal.get(i);
+                if(i == inOrderTraversal.size()-1){
+                    // Last iter
+                    if(elem.b == false){
+                        output += logicalAndString(elem, queryProbs);
+                        output += ") {\n\tanswer[j++] = i;\n}";
+                    } else {
+                        output += ") {\n\tanswer[j] = i;\n\tj += ";
+                        output += logicalAndString(elem, queryProbs);
+                        output += ";\n}";
+                    }
+                } else {
+                    // otherwise
+                    if(elem.L == null && elem.R == null){
+                        // logical and with branch term
+                        output += logicalAndString(elem, queryProbs);
+                        // output += "(";
+                        // int bitmap = elem.getIndex();
+                        // for(int j = 0; j < queryProbs.size(); j++){
+                        //     int bit = getBit(bitmap, j);
+                        //     if(bit == 1){
+                        //         output += "t%d[o%d[i]]".format(j+1);
+                        //     }
+                        //     if(j != queryProbs.size()-1){
+                        //         output += " & ";
+                        //     }
+                        // }
+                        // output += ")";
+                    } else {
+                        // && term
+                        if(i != inOrderTraversal.size() - 2){
+                            output += " && ";
+                        }
+                    }
+                }
+            }
+            System.out.println(output);
         }
     }
 }
-
 
 
 
