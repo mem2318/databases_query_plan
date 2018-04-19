@@ -89,6 +89,8 @@ public class DatabaseQueryPlanGenerator {
         ArrayList<ArrayList<Double>> queryList = new ArrayList<ArrayList<Double>>();
         int r, t, l, m, a, f;
         r = t = l = m = a = f = 0;
+
+        //store properties from config.txt with java.util.Properties formatting
         try {
         	configInput = new FileInputStream(args[1]);
 
@@ -101,6 +103,7 @@ public class DatabaseQueryPlanGenerator {
             a = Integer.parseInt(prop.getProperty("a"));
             f = Integer.parseInt(prop.getProperty("f"));
 
+            //store values from query.txt
         	queryInput = new BufferedReader(new FileReader(args[0]));
         	String lineRead = queryInput.readLine();
         	while(lineRead != null){
@@ -114,11 +117,11 @@ public class DatabaseQueryPlanGenerator {
 
         	}
 
-
-        }  catch (IOException ex) {
+        //error if either config.txt or query.txt is missing or in incorrect format
+        }  catch (IOException ex) {  
             System.out.println("Error in reading and processing the input files, make sure they are as shown in the assignment.");
 			// ex.printStackTrace();
-		} finally {
+    	} finally { 
 			if (configInput != null) {
 				try {
 					configInput.close();
@@ -130,17 +133,19 @@ public class DatabaseQueryPlanGenerator {
 
         for(ArrayList<Double> queryProbs : queryList){
 
+            //beginning part 1 of the algorithm, generate 2^k - 1 plans 
             int numOfPlans = ((int) Math.pow(2, queryProbs.size()))-1;
             // System.out.println("NumPlans: "+numOfPlans);
+           
+            //generate array A using only &-terms for each nonempty subset s
             PlanElement[] A = new PlanElement[numOfPlans];
             for(int i = 1; i <= A.length; i++){
                 int bits = countSetBits(i);
                 double prob = computeProb(queryProbs, i);
                 int k = bits;
 
-
-
                 A[i-1] = new PlanElement(bits, prob, false, i);
+
 
                 double q;
                 if(prob <= 0.5){
@@ -148,10 +153,15 @@ public class DatabaseQueryPlanGenerator {
                 } else {
                     q = 1.0-prob;
                 }
+
+                //compute logical cost
                 double logicalCost = k*r + (k-1)*l + f*k + t + m*q + prob*a;
 
+                //compute no branch cost
                 double noBranchCost = k*r + (k-1)*l + f*k + a;
 
+                //if the cost for no-branch algorithm is smaller, replace A[s].c by
+                //that cost and set A[s].b = true
                 A[i-1].c = logicalCost > noBranchCost ? noBranchCost : logicalCost;
                 A[i-1].b = logicalCost > noBranchCost ? true : false;
                 // System.out.println("Cost "+i+": "+logicalCost + " " + noBranchCost);
@@ -159,9 +169,13 @@ public class DatabaseQueryPlanGenerator {
             
             // System.out.println("\n\nPart 2:\n");
 
+            //begin part 2 of the algorithm
             for(int s = 1; s <= A.length; s++){
                 int s_all = (~s) & (A.length);
                 // System.out.println("\nLoop index: "+s+" "+s_all);
+                
+                //for each nonempty s' in S such that s intersectinon s' = empty set...
+                //sp is also equivalent to s' 
                 for(int sp = 0; sp <= A.length; sp++){
                     if((~s_all & sp) == 0 && sp != 0){
                         // System.out.println(sp);
@@ -177,8 +191,11 @@ public class DatabaseQueryPlanGenerator {
                         if(s_leftmost_p != s_leftmost.p){
                             System.out.println("non-matching s leftmost prob");
                         }
+
                         double s_leftmost_cmetric = (s_leftmost_p-1)/s_leftmost_fcost;
                         // System.out.println("Cmetrics: "+ s_leftmost_cmetric+ " " + sp_cmetric+ " "+sp_p);
+                        
+                        //if the c-metric of s' is dominated by the c-metric of the leftmost & term in s
                         if(s_leftmost_cmetric >= sp_cmetric && s_leftmost_p > sp_p){
                             ArrayList<PlanElement> s_logical_terms = A[s-1].getLogicalTerms();
                             boolean case_2_fail = false;
@@ -197,17 +214,21 @@ public class DatabaseQueryPlanGenerator {
                                 case_2_fail = false;
                             }
                             // System.out.println("dmetric result: "+case_2_fail);
+                            
+                            //otherwise calculate the cost c for the combined plan (s' && s) using Eq 1
                             if(case_2_fail == false){
                                 int combined = sp|s;
                                 double overall_p = computeProb(queryProbs, sp|s);
                                 double overall_q = Math.min(overall_p, 1-overall_p);
                                 double combinedCost = sp_fcost + m*overall_q + overall_p*A[s-1].c;
                                 // System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
+                              
+                                //If c < A[s' union s].c then:
                                 if(combinedCost < A[combined-1].c){
                                     // System.out.println("Updating!!!");
-                                    A[combined-1].c = combinedCost;
-                                    A[combined-1].L = A[sp-1];
-                                    A[combined-1].R = A[s-1];
+                                    A[combined-1].c = combinedCost; //replace A[s' union s].c with c
+                                    A[combined-1].L = A[sp-1]; //replace A[s' union s].L with s'
+                                    A[combined-1].R = A[s-1]; //replace A[s' union s].R with
                                 }
                             }
                         }
@@ -224,6 +245,8 @@ public class DatabaseQueryPlanGenerator {
             }
             System.out.println("\n------------------------------------------------------------------");
 
+
+            //traverse tree and build up string to generate c program 
             ArrayList<PlanElement> inOrderTraversal = A[A.length-1].inOrderTraversal();
             String output = "if(";
             for(int i = 0; i < inOrderTraversal.size(); i++){
