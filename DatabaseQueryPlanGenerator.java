@@ -176,7 +176,7 @@ public class DatabaseQueryPlanGenerator {
                         }
                         double s_leftmost_cmetric = (s_leftmost_p-1)/s_leftmost_fcost;
                         // System.out.println("Cmetrics: "+ s_leftmost_cmetric+ " " + sp_cmetric+ " "+sp_p);
-                        if(s_leftmost_cmetric >= sp_cmetric && sp_p <= 0.5){
+                        if(s_leftmost_cmetric >= sp_cmetric && s_leftmost_p > sp_p){
                             ArrayList<PlanElement> s_logical_terms = A[s-1].getLogicalTerms();
                             boolean case_2_fail = false;
                             for(PlanElement term : s_logical_terms){
@@ -189,6 +189,9 @@ public class DatabaseQueryPlanGenerator {
                                         break;
                                     }
                                 }
+                            }
+                            if(sp_p >= 0.5){
+                                case_2_fail = false;
                             }
                             // System.out.println("dmetric result: "+case_2_fail);
                             if(case_2_fail == false){
