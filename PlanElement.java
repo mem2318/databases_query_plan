@@ -1,4 +1,9 @@
 import java.util.ArrayList;
+
+/**
+ * This class is holder the information relating to a particular node in the tree.
+ * Effectively the algorithm constructs right-deep binary tree so this is the node.
+ */
 public class PlanElement {
 	int n;
 	double p;

@@ -6,8 +6,18 @@ import java.util.ArrayList;
 import java.io.*;
 import java.util.*;
 
+/**
+ * This is the wrapper for the main that runs the algorithm.
+ * 
+ */
 public class DatabaseQueryPlanGenerator {
 
+    /**
+     * This function counts the number of set bits in an integer.  For positive integers, used as bitmaps,
+     * this represents the number of elements in this set/subset.
+     * @param n: the integer to be counted.
+     * @return int the number of set bits.
+     */
     static int countSetBits(int n)
     {
         int count = 0;
@@ -19,11 +29,23 @@ public class DatabaseQueryPlanGenerator {
         return count;
     }
 
+    /**
+     * This gets the value of a certain bit in an integer.
+     * @param val This is the number to be searched.
+     * @param position This is the position of the bit you want the value of.
+     * @return int representing the boolean value.
+     */
     static int getBit(int val, int position)
     {
        return (val >> position) & 1;
     }
 
+    /**
+     * This gets the joint probability of a given subset from a probability list.
+     * @param probs the complete list of probabilities
+     * @param mask bits set to one in this will be used as indexes into the probability list to be used.
+     * @return double the probability.
+     */
     static double computeProb(ArrayList<Double> probs, int mask){
         double prob = 1.0;
         for(int j = 0; j < probs.size(); j++) {
@@ -33,6 +55,13 @@ public class DatabaseQueryPlanGenerator {
         }
         return prob;
     }
+
+    /**
+     * This function just makes a string for logical and for actually putting together the c code.
+     * @param elem the plan element we're using
+     * @param queryProbs the probabilities list
+     * @return string with c code for logical and.
+     */
     static String logicalAndString(PlanElement elem, ArrayList<Double> queryProbs){
         String output = "(";
         int bitmap = elem.getIndex();
@@ -64,12 +93,6 @@ public class DatabaseQueryPlanGenerator {
         	configInput = new FileInputStream(args[1]);
 
         	prop.load(configInput);
-        	// System.out.println(prop.getProperty("r"));
-        	// System.out.println(prop.getProperty("t"));
-        	// System.out.println(prop.getProperty("l"));
-        	// System.out.println(prop.getProperty("m"));
-        	// System.out.println(prop.getProperty("a"));
-        	// System.out.println(prop.getProperty("f"));
 
             r = Integer.parseInt(prop.getProperty("r"));
             t = Integer.parseInt(prop.getProperty("t"));
@@ -93,7 +116,8 @@ public class DatabaseQueryPlanGenerator {
 
 
         }  catch (IOException ex) {
-			ex.printStackTrace();
+            System.out.println("Error in reading and processing the input files, make sure they are as shown in the assignment.");
+			// ex.printStackTrace();
 		} finally {
 			if (configInput != null) {
 				try {
@@ -194,8 +218,11 @@ public class DatabaseQueryPlanGenerator {
             // System.out.println(A[A.length-1].printTree());
 
             System.out.println("==================================================================");
-            System.out.println(queryProbs.toString());
-            System.out.println("------------------------------------------------------------------");
+            // System.out.println(queryProbs.toString());
+            for(double prob: queryProbs){
+                System.out.print(prob+" ");
+            }
+            System.out.println("\n------------------------------------------------------------------");
 
             ArrayList<PlanElement> inOrderTraversal = A[A.length-1].inOrderTraversal();
             String output = "if(";
