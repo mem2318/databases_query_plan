@@ -1,3 +1,3 @@
 #!/bin/bash
 
-java DatabaseQueryPlanGenerator query.txt config.txt
+java DatabaseQueryPlanGenerator query.txt config.txt > output.txt
