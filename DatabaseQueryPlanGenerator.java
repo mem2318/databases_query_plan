@@ -133,7 +133,7 @@ public class DatabaseQueryPlanGenerator {
                 // System.out.println("Cost "+i+": "+logicalCost + " " + noBranchCost);
             }
             
-            System.out.println("\n\nPart 2:\n");
+            // System.out.println("\n\nPart 2:\n");
 
             for(int s = 1; s <= A.length; s++){
                 int s_all = (~s) & (A.length);
