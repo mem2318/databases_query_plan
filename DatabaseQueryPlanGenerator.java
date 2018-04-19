@@ -61,7 +61,7 @@ public class DatabaseQueryPlanGenerator {
         int r, t, l, m, a, f;
         r = t = l = m = a = f = 0;
         try {
-        	configInput = new FileInputStream("config.txt");
+        	configInput = new FileInputStream(args[1]);
 
         	prop.load(configInput);
         	// System.out.println(prop.getProperty("r"));
@@ -78,7 +78,7 @@ public class DatabaseQueryPlanGenerator {
             a = Integer.parseInt(prop.getProperty("a"));
             f = Integer.parseInt(prop.getProperty("f"));
 
-        	queryInput = new BufferedReader(new FileReader("1_query.txt"));
+        	queryInput = new BufferedReader(new FileReader(args[0]));
         	String lineRead = queryInput.readLine();
         	while(lineRead != null){
         		String[] splitted = lineRead.split("\\s+");
@@ -90,13 +90,6 @@ public class DatabaseQueryPlanGenerator {
         		lineRead = queryInput.readLine();
 
         	}
-
-        	// for(ArrayList<Double> i : queryList){
-        	// 	for(Double d : i){
-        	// 		System.out.print(Double.toString(d) + " ");
-        	// 	}
-        	// 	System.out.print("\n");
-        	// }
 
 
         }  catch (IOException ex) {
@@ -120,19 +113,10 @@ public class DatabaseQueryPlanGenerator {
                 int bits = countSetBits(i);
                 double prob = computeProb(queryProbs, i);
                 int k = bits;
-                // double sumProb = 0.0;
-                // for(int j = 0; j < queryProbs.size(); j++) {
-                //     if(getBit(i, j) == 1){
-                //         prob *= queryProbs.get(j);
-                //         sumProb += queryProbs.get(j);
-                //     }
-                // }
 
 
 
                 A[i-1] = new PlanElement(bits, prob, false, i);
-                // System.out.println("Params "+i+": "+ bits+" "+prob);
-                // System.out.println(A[i-1].toString());
 
                 double q;
                 if(prob <= 0.5){
@@ -141,7 +125,6 @@ public class DatabaseQueryPlanGenerator {
                     q = 1.0-prob;
                 }
                 double logicalCost = k*r + (k-1)*l + f*k + t + m*q + prob*a;
-                // double logicalCost = 1;
 
                 double noBranchCost = k*r + (k-1)*l + f*k + a;
 
@@ -149,10 +132,6 @@ public class DatabaseQueryPlanGenerator {
                 A[i-1].b = logicalCost > noBranchCost ? true : false;
                 // System.out.println("Cost "+i+": "+logicalCost + " " + noBranchCost);
             }
-
-            // for(int i = 0; i < A.length; i++){
-            //     System.out.println(A[i].toString());
-            // }
             
             System.out.println("\n\nPart 2:\n");
 
@@ -210,30 +189,13 @@ public class DatabaseQueryPlanGenerator {
                         }
                     }
                 }
-
-
-
-                // System.out.println(sp);
-                // if(sp != 0){
-                //     double branchingAnd = 0.0;
-
-                //     for(int j = queryProbs.size()-1; j >= 0; j--){
-                //         if(getBit(s, j) == 1){
-                //             double p_n = queryProbs.get(j);
-                //             double q_n = p_n <= 0.5 ? p_n : 1.0-p_n; 
-                //             branchingAnd = r + t + f + m*q_n + p_n*branchingAnd;
-                //         }
-                //     }
-
-                // }
-                // System.out.println();
             }
-            // for(int i = 0; i < A.length; i++){
-            //     // System.out.println(A[i].toString());
-            //     System.out.println(A[i].printTree());
-            // }
-            System.out.println("Finished Algorithm 1 for: "+queryProbs.toString());
-            System.out.println(A[A.length-1].printTree());
+            // System.out.println("Finished Algorithm 1 for: "+queryProbs.toString());
+            // System.out.println(A[A.length-1].printTree());
+
+            System.out.println("==================================================================");
+            System.out.println(queryProbs.toString());
+            System.out.println("------------------------------------------------------------------");
 
             ArrayList<PlanElement> inOrderTraversal = A[A.length-1].inOrderTraversal();
             String output = "if(";
@@ -254,18 +216,6 @@ public class DatabaseQueryPlanGenerator {
                     if(elem.L == null && elem.R == null){
                         // logical and with branch term
                         output += logicalAndString(elem, queryProbs);
-                        // output += "(";
-                        // int bitmap = elem.getIndex();
-                        // for(int j = 0; j < queryProbs.size(); j++){
-                        //     int bit = getBit(bitmap, j);
-                        //     if(bit == 1){
-                        //         output += "t%d[o%d[i]]".format(j+1);
-                        //     }
-                        //     if(j != queryProbs.size()-1){
-                        //         output += " & ";
-                        //     }
-                        // }
-                        // output += ")";
                     } else {
                         // && term
                         if(i != inOrderTraversal.size() - 2){
@@ -275,7 +225,11 @@ public class DatabaseQueryPlanGenerator {
                 }
             }
             System.out.println(output);
+            System.out.println("------------------------------------------------------------------");
+            System.out.println(A[A.length-1].c);
+
         }
+        System.out.println("==================================================================");
     }
 }
 
