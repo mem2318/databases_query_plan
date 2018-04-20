@@ -237,7 +237,7 @@ public class DatabaseQueryPlanGenerator {
                                 // double overall_q = Math.min(overall_p, 1-overall_p);
                                 double sp_p2 = computeProb(queryProbs, sp);
                                 double sp_q = Math.min(sp_p2, 1-sp_p2);
-                                double combinedCost = sp_fcost + m*sp_p + sp_p*A[s-1].c;
+                                double combinedCost = sp_fcost + m*sp_q + sp_p2*A[s-1].c;
                                 
                                 //If c < A[s' union s].c then:
                                 // System.out.println("\nJoint: "+getsetBits(combined, queryProbs).toString());
@@ -246,10 +246,10 @@ public class DatabaseQueryPlanGenerator {
                                 if(combinedCost < A[combined-1].c){
                                     System.out.println("Updating!!!");
                                     System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
-                                    // System.out.println("S: "+getSetBits(s, queryProbs).toString());
-                                    // System.out.println("S: "+A[s-1].toString());
-                                    // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
-                                    // System.out.println("Sp: "+A[sp-1].toString());
+                                    System.out.println("S: "+getSetBits(s, queryProbs).toString());
+                                    System.out.println("S: "+A[s-1].toString());
+                                    System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
+                                    System.out.println("Sp: "+A[sp-1].toString()+" "+sp_fcost);
                                     // System.out.println("")
                                     A[combined-1].c = combinedCost; //replace A[s' union s].c with c
                                     A[combined-1].L = A[sp-1]; //replace A[s' union s].L with s'
@@ -257,17 +257,17 @@ public class DatabaseQueryPlanGenerator {
                                 } else {
                                     System.out.println("NOT UPDATING");
                                     System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
-                                    // System.out.println("S: "+getSetBits(s, queryProbs).toString());
-                                    // System.out.println("S: "+A[s-1].toString());
-                                    // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
-                                    // System.out.println("Sp: "+A[sp-1].toString());
+                                    System.out.println("S: "+getSetBits(s, queryProbs).toString());
+                                    System.out.println("S: "+A[s-1].toString());
+                                    System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
+                                    System.out.println("Sp: "+A[sp-1].toString()+" "+sp_fcost+" "+A[s-1].c+" "+A[sp-1].c);
                                 }
                             }
                         }
-                        System.out.println("S: "+getSetBits(s, queryProbs).toString());
-                        System.out.println("S: "+A[s-1].toString());
-                        System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
-                        System.out.println("Sp: "+A[sp-1].toString());
+                        // System.out.println("S: "+getSetBits(s, queryProbs).toString());
+                        // System.out.println("S: "+A[s-1].toString());
+                        // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
+                        // System.out.println("Sp: "+A[sp-1].toString());
         }
                 }
             }
