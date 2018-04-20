@@ -81,6 +81,18 @@ public class DatabaseQueryPlanGenerator {
         return output;
     }
 
+    static ArrayList<String> getSetBits(int mask, ArrayList<Double> queryProbs){
+        ArrayList<String> output = new ArrayList<String>();
+        for(int i = 0; i < queryProbs.size(); i++){
+            int bit = getBit(mask, i);
+            if(bit == 1){
+                String s = "t"+(i+1);
+                output.add(s);
+            }
+        }
+        return output;
+    }
+
 	public static void main(String[] args) {
         Properties prop = new Properties();
         InputStream configInput = null;
@@ -171,6 +183,7 @@ public class DatabaseQueryPlanGenerator {
 
             //begin part 2 of the algorithm
             for(int s = 1; s <= A.length; s++){
+                // System.out.println(getSetBits(s, queryProbs).toString());
                 int s_all = (~s) & (A.length);
                 // System.out.println("\nLoop index: "+s+" "+s_all);
                 
@@ -178,6 +191,8 @@ public class DatabaseQueryPlanGenerator {
                 //sp is also equivalent to s' 
                 for(int sp = 0; sp <= A.length; sp++){
                     if((~s_all & sp) == 0 && sp != 0){
+                        System.out.println("\nJoint: "+getSetBits(s|sp, queryProbs).toString());
+
                         // System.out.println(sp);
                         int sp_k = countSetBits(sp);
                         double sp_fcost = sp_k*r + (sp_k-1)*l + f*sp_k + t;
@@ -223,18 +238,37 @@ public class DatabaseQueryPlanGenerator {
                                 double sp_p2 = computeProb(queryProbs, sp);
                                 double sp_q = Math.min(sp_p2, 1-sp_p2);
                                 double combinedCost = sp_fcost + m*sp_p + sp_p*A[s-1].c;
-                                // System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
-                              
+                                
                                 //If c < A[s' union s].c then:
+                                // System.out.println("\nJoint: "+getsetBits(combined, queryProbs).toString());
+                                // System.out.println("\nJoint: "+getSetBits(combined, queryProbs).toString());
+
                                 if(combinedCost < A[combined-1].c){
-                                    // System.out.println("Updating!!!");
+                                    System.out.println("Updating!!!");
+                                    System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
+                                    // System.out.println("S: "+getSetBits(s, queryProbs).toString());
+                                    // System.out.println("S: "+A[s-1].toString());
+                                    // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
+                                    // System.out.println("Sp: "+A[sp-1].toString());
+                                    // System.out.println("")
                                     A[combined-1].c = combinedCost; //replace A[s' union s].c with c
                                     A[combined-1].L = A[sp-1]; //replace A[s' union s].L with s'
                                     A[combined-1].R = A[s-1]; //replace A[s' union s].R with
+                                } else {
+                                    System.out.println("NOT UPDATING");
+                                    System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
+                                    // System.out.println("S: "+getSetBits(s, queryProbs).toString());
+                                    // System.out.println("S: "+A[s-1].toString());
+                                    // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
+                                    // System.out.println("Sp: "+A[sp-1].toString());
                                 }
                             }
                         }
-                    }
+                        System.out.println("S: "+getSetBits(s, queryProbs).toString());
+                        System.out.println("S: "+A[s-1].toString());
+                        System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
+                        System.out.println("Sp: "+A[sp-1].toString());
+        }
                 }
             }
             // System.out.println("Finished Algorithm 1 for: "+queryProbs.toString());
