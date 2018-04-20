@@ -218,9 +218,11 @@ public class DatabaseQueryPlanGenerator {
                             //otherwise calculate the cost c for the combined plan (s' && s) using Eq 1
                             if(case_2_fail == false){
                                 int combined = sp|s;
-                                double overall_p = computeProb(queryProbs, sp|s);
-                                double overall_q = Math.min(overall_p, 1-overall_p);
-                                double combinedCost = sp_fcost + m*overall_q + overall_p*A[s-1].c;
+                                // double overall_p = computeProb(queryProbs, sp|s);
+                                // double overall_q = Math.min(overall_p, 1-overall_p);
+                                double sp_p2 = computeProb(queryProbs, sp);
+                                double sp_q = Math.min(sp_p2, 1-sp_p2);
+                                double combinedCost = sp_fcost + m*sp_p + sp_p*A[s-1].c;
                                 // System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
                               
                                 //If c < A[s' union s].c then:
