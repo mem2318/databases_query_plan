@@ -147,7 +147,6 @@ public class DatabaseQueryPlanGenerator {
 
             //beginning part 1 of the algorithm, generate 2^k - 1 plans 
             int numOfPlans = ((int) Math.pow(2, queryProbs.size()))-1;
-            // System.out.println("NumPlans: "+numOfPlans);
            
             //generate array A using only &-terms for each nonempty subset s
             PlanElement[] A = new PlanElement[numOfPlans];
@@ -176,33 +175,21 @@ public class DatabaseQueryPlanGenerator {
                 //that cost and set A[s].b = true
                 A[i-1].c = logicalCost > noBranchCost ? noBranchCost : logicalCost;
                 A[i-1].b = logicalCost > noBranchCost ? true : false;
-                // System.out.println("Cost "+i+": "+logicalCost + " " + noBranchCost);
             }
             
-            // System.out.println("\n\nPart 2:\n");
 
             //begin part 2 of the algorithm
             for(int s = 1; s <= A.length; s++){
-                // System.out.println(getSetBits(s, queryProbs).toString());
                 int s_all = (~s) & (A.length);
-                // System.out.println("\nLoop index: "+s+" "+s_all);
                 
                 //for each nonempty s' in S such that s intersectinon s' = empty set...
                 //sp is also equivalent to s' 
                 for(int sp = 0; sp <= A.length; sp++){
                     if((~s_all & sp) == 0 && sp != 0){
-                        System.out.println("\n\n\nJoint: "+getSetBits(s|sp, queryProbs).toString());
-                        System.out.println("S: "+getSetBits(s, queryProbs).toString());
-                        System.out.println("S: "+A[s-1].toString());
-                        System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
-                        System.out.println("Sp: "+A[sp-1].toString());
-                        // System.out.println(sp);
                         int sp_k = countSetBits(sp);
                         double sp_fcost = sp_k*r + (sp_k-1)*l + f*sp_k + t;
                         double sp_p = computeProb(queryProbs, sp);
                         double sp_cmetric = (sp_p-1)/sp_fcost;
-                        // System.out.println(A[s-1].printTree());
-                        // PlanElement s_leftmost = A[s-1].getLeftmostLogical();
                         PlanElement s_leftmost = A[s-1].getLeftmost();
                         double s_leftmost_fcost = s_leftmost.n*r + (s_leftmost.n-1)*l + f*s_leftmost.n + t;
                         double s_leftmost_p = computeProb(queryProbs, s_leftmost.getIndex());
@@ -211,11 +198,8 @@ public class DatabaseQueryPlanGenerator {
                         }
 
                         double s_leftmost_cmetric = (s_leftmost_p-1)/s_leftmost_fcost;
-                        System.out.println("Cmetrics: "+ s_leftmost_cmetric+ " " + sp_cmetric+ " "+sp_p+" "+s_leftmost_p);
-                        System.out.println("Cmetric result: "+ (!(s_leftmost_cmetric < sp_cmetric && s_leftmost_p <= sp_p)));
                         //if the c-metric of s' is dominated by the c-metric of the leftmost & term in s
                         if(!(s_leftmost_cmetric < sp_cmetric && s_leftmost_p <= sp_p)){
-                            // System.out.println("Made it through cmetric");
                             ArrayList<PlanElement> s_logical_terms = A[s-1].getLogicalTerms();
                             boolean case_2_fail = false;
                             for(PlanElement term : s_logical_terms){
@@ -232,54 +216,27 @@ public class DatabaseQueryPlanGenerator {
                             if(sp_p >= 0.5){
                                 case_2_fail = false;
                             }
-                            System.out.println("dmetric result: "+case_2_fail);
                             
                             //otherwise calculate the cost c for the combined plan (s' && s) using Eq 1
                             if(case_2_fail == false){
                                 int combined = sp|s;
-                                // double overall_p = computeProb(queryProbs, sp|s);
-                                // double overall_q = Math.min(overall_p, 1-overall_p);
                                 double sp_p2 = computeProb(queryProbs, sp);
                                 double sp_q = Math.min(sp_p2, 1-sp_p2);
                                 double combinedCost = sp_fcost + m*sp_q + sp_p2*A[s-1].c;
                                 
                                 //If c < A[s' union s].c then:
-                                // System.out.println("\nJoint: "+getsetBits(combined, queryProbs).toString());
-                                // System.out.println("\nJoint: "+getSetBits(combined, queryProbs).toString());
-
                                 if(combinedCost < A[combined-1].c){
-                                    System.out.println("Updating!!!");
-                                    System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
-                                    // System.out.println("S: "+getSetBits(s, queryProbs).toString());
-                                    // System.out.println("S: "+A[s-1].toString());
-                                    // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
-                                    // System.out.println("Sp: "+A[sp-1].toString()+" "+sp_fcost);
-                                    // System.out.println("")
                                     A[combined-1].c = combinedCost; //replace A[s' union s].c with c
                                     A[combined-1].L = A[sp-1]; //replace A[s' union s].L with s'
                                     A[combined-1].R = A[s-1]; //replace A[s' union s].R with
-                                } else {
-                                    System.out.println("NOT UPDATING");
-                                    System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
-                                    // System.out.println("S: "+getSetBits(s, queryProbs).toString());
-                                    // System.out.println("S: "+A[s-1].toString());
-                                    // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
-                                    // System.out.println("Sp: "+A[sp-1].toString()+" "+sp_fcost+" "+A[s-1].c+" "+A[sp-1].c);
                                 }
                             }
                         }
-                        // System.out.println("S: "+getSetBits(s, queryProbs).toString());
-                        // System.out.println("S: "+A[s-1].toString());
-                        // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
-                        // System.out.println("Sp: "+A[sp-1].toString());
-        }
+                    }
                 }
             }
-            // System.out.println("Finished Algorithm 1 for: "+queryProbs.toString());
-            // System.out.println(A[A.length-1].printTree());
 
             System.out.println("==================================================================");
-            // System.out.println(queryProbs.toString());
             for(double prob: queryProbs){
                 System.out.print(prob+" ");
             }
