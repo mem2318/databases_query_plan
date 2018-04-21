@@ -191,8 +191,11 @@ public class DatabaseQueryPlanGenerator {
                 //sp is also equivalent to s' 
                 for(int sp = 0; sp <= A.length; sp++){
                     if((~s_all & sp) == 0 && sp != 0){
-                        System.out.println("\nJoint: "+getSetBits(s|sp, queryProbs).toString());
-
+                        System.out.println("\n\n\nJoint: "+getSetBits(s|sp, queryProbs).toString());
+                        System.out.println("S: "+getSetBits(s, queryProbs).toString());
+                        System.out.println("S: "+A[s-1].toString());
+                        System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
+                        System.out.println("Sp: "+A[sp-1].toString());
                         // System.out.println(sp);
                         int sp_k = countSetBits(sp);
                         double sp_fcost = sp_k*r + (sp_k-1)*l + f*sp_k + t;
@@ -208,10 +211,11 @@ public class DatabaseQueryPlanGenerator {
                         }
 
                         double s_leftmost_cmetric = (s_leftmost_p-1)/s_leftmost_fcost;
-                        // System.out.println("Cmetrics: "+ s_leftmost_cmetric+ " " + sp_cmetric+ " "+sp_p);
-                        
+                        System.out.println("Cmetrics: "+ s_leftmost_cmetric+ " " + sp_cmetric+ " "+sp_p+" "+s_leftmost_p);
+                        System.out.println("Cmetric result: "+ (!(s_leftmost_cmetric < sp_cmetric && s_leftmost_p <= sp_p)));
                         //if the c-metric of s' is dominated by the c-metric of the leftmost & term in s
-                        if(s_leftmost_cmetric >= sp_cmetric && s_leftmost_p > sp_p){
+                        if(!(s_leftmost_cmetric < sp_cmetric && s_leftmost_p <= sp_p)){
+                            // System.out.println("Made it through cmetric");
                             ArrayList<PlanElement> s_logical_terms = A[s-1].getLogicalTerms();
                             boolean case_2_fail = false;
                             for(PlanElement term : s_logical_terms){
@@ -228,7 +232,7 @@ public class DatabaseQueryPlanGenerator {
                             if(sp_p >= 0.5){
                                 case_2_fail = false;
                             }
-                            // System.out.println("dmetric result: "+case_2_fail);
+                            System.out.println("dmetric result: "+case_2_fail);
                             
                             //otherwise calculate the cost c for the combined plan (s' && s) using Eq 1
                             if(case_2_fail == false){
@@ -246,10 +250,10 @@ public class DatabaseQueryPlanGenerator {
                                 if(combinedCost < A[combined-1].c){
                                     System.out.println("Updating!!!");
                                     System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
-                                    System.out.println("S: "+getSetBits(s, queryProbs).toString());
-                                    System.out.println("S: "+A[s-1].toString());
-                                    System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
-                                    System.out.println("Sp: "+A[sp-1].toString()+" "+sp_fcost);
+                                    // System.out.println("S: "+getSetBits(s, queryProbs).toString());
+                                    // System.out.println("S: "+A[s-1].toString());
+                                    // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
+                                    // System.out.println("Sp: "+A[sp-1].toString()+" "+sp_fcost);
                                     // System.out.println("")
                                     A[combined-1].c = combinedCost; //replace A[s' union s].c with c
                                     A[combined-1].L = A[sp-1]; //replace A[s' union s].L with s'
@@ -257,10 +261,10 @@ public class DatabaseQueryPlanGenerator {
                                 } else {
                                     System.out.println("NOT UPDATING");
                                     System.out.println("Costs: "+combinedCost+" "+A[combined-1].c);
-                                    System.out.println("S: "+getSetBits(s, queryProbs).toString());
-                                    System.out.println("S: "+A[s-1].toString());
-                                    System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
-                                    System.out.println("Sp: "+A[sp-1].toString()+" "+sp_fcost+" "+A[s-1].c+" "+A[sp-1].c);
+                                    // System.out.println("S: "+getSetBits(s, queryProbs).toString());
+                                    // System.out.println("S: "+A[s-1].toString());
+                                    // System.out.println("Sp: "+getSetBits(sp, queryProbs).toString());
+                                    // System.out.println("Sp: "+A[sp-1].toString()+" "+sp_fcost+" "+A[s-1].c+" "+A[sp-1].c);
                                 }
                             }
                         }
